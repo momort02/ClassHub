@@ -1,4 +1,4 @@
-import { auth, db } from "../firebase/firebase.js";
+import { auth, db, setThemePreference } from "../firebase/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, increment, getDocs, addDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
@@ -68,6 +68,7 @@ onAuthStateChanged(auth, async (user) => {
     if (currentUserData.role === "delegue") document.getElementById("btn-delegue").style.display = "flex";
     if (currentUserData.isAdmin === true) document.getElementById("btn-admin").style.display = "flex";
 
+    initThemeSettings();
     initElections();
     loadAvis();
     initAvatarUpload();
@@ -76,6 +77,31 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 /** Permet à l'élève de changer sa photo de profil (compressée puis stockée dans Firestore). */
+function initThemeSettings() {
+  const toggle = document.getElementById("theme-toggle");
+  const statusEl = document.getElementById("theme-status");
+  if (!toggle) return;
+
+  const currentTheme = document.documentElement.getAttribute("data-theme") || localStorage.getItem("classhub-theme") || "light";
+  toggle.checked = currentTheme === "dark";
+
+  if (toggle.dataset.bound === "true") return;
+  toggle.dataset.bound = "true";
+
+  toggle.addEventListener("change", async () => {
+    const nextTheme = toggle.checked ? "dark" : "light";
+    await setThemePreference(nextTheme);
+
+    if (statusEl) {
+      statusEl.textContent = nextTheme === "dark" ? "Mode sombre activé ✅" : "Mode clair activé ☀️";
+      statusEl.style.display = "block";
+      setTimeout(() => {
+        statusEl.style.display = "none";
+      }, 1800);
+    }
+  });
+}
+
 function initAvatarUpload() {
   const btnChange = document.getElementById("btn-change-avatar");
   const fileInput = document.getElementById("avatar-input");

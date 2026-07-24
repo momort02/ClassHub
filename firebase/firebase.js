@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCATWpxQOgJJvXhaH2y-aANiF0RUvx5Fw0",
@@ -16,6 +16,56 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
+
+const THEME_STORAGE_KEY = "classhub-theme";
+
+function applyTheme(theme) {
+  const normalized = theme === "dark" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", normalized);
+  document.body?.setAttribute("data-theme", normalized);
+  localStorage.setItem(THEME_STORAGE_KEY, normalized);
+
+  const toggle = document.getElementById("theme-toggle");
+  if (toggle) toggle.checked = normalized === "dark";
+}
+
+export async function setThemePreference(theme) {
+  const normalized = theme === "dark" ? "dark" : "light";
+  applyTheme(normalized);
+
+  if (!auth.currentUser) return;
+
+  try {
+    await setDoc(doc(db, "users", auth.currentUser.uid), {
+      preferences: {
+        theme: normalized
+      }
+    }, { merge: true });
+  } catch (error) {
+    console.error("Erreur enregistrement thème Firebase:", error);
+  }
+}
+
+function initThemePreference() {
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "light";
+  applyTheme(savedTheme);
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      const firestoreTheme = snap.exists() && snap.data()?.preferences?.theme;
+      if (firestoreTheme) {
+        applyTheme(firestoreTheme);
+      }
+    } catch (error) {
+      console.error("Erreur chargement thème depuis Firebase:", error);
+    }
+  });
+}
+
+initThemePreference();
 // Pas d'export "storage" : les photos de profil sont stockées directement
 // dans Firestore (voir js/profil.js), pas besoin de Firebase Storage, donc
 // pas besoin du plan payant Blaze pour ça.
