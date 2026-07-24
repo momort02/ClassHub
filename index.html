@@ -6,6 +6,8 @@
   <title>ClassHub - Accueil</title>
   <link rel="stylesheet" href="css/style.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
 </head>
 <body class="login-page">
   <div class="card" style="text-align: center;">
@@ -20,5 +22,10 @@
       <span class="material-icons">login</span> Se connecter
     </a>
   </div>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
 </body>
 </html>
