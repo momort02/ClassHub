@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ClassHub - Demandes</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <nav class="sidebar">
+      <ul class="nav-menu">
+        <a href="dashboard.html" class="nav-item active"><span class="material-icons">forum</span>Demandes</a>
+        <a href="annonces.html" class="nav-item"><span class="material-icons">campaign</span>Annonces</a>
+        <a href="sondages.html" class="nav-item"><span class="material-icons">poll</span>Sondages</a>
+        <a href="profil.html" class="nav-item"><span class="material-icons">person</span>Profil</a>
+      </ul>
+      <div class="sidebar-footer">
+        <button id="btn-logout" class="btn-icon"><span class="material-icons">logout</span></button>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="header-bar">
+        <h2>Demandes</h2>
+        <button id="btn-open-modal" class="btn"><span class="material-icons">add</span> Nouvelle Demande</button>
+      </div>
+      <div id="demandes-list"></div>
+    </main>
+  </div>
+
+  <div id="modal-demande" class="modal-overlay">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 1.5rem;">Nouvelle demande</h3>
+      <form id="form-demande">
+        <div class="form-group">
+          <label>Titre</label>
+          <input type="text" id="demande-titre" required>
+        </div>
+        <div class="form-group">
+          <label>Catégorie</label>
+          <select id="demande-categorie">
+            <option>Devoirs</option>
+            <option>Contrôles</option>
+            <option>Vie de classe</option>
+            <option>Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="demande-description" rows="3" required></textarea>
+        </div>
+        <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:var(--text-primary); cursor:pointer;">
+          <input type="checkbox" id="demande-anonyme" style="width:auto; padding:0;">
+          Publier anonymement
+        </label>
+        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem; gap: 1rem;">
+          <button type="button" id="btn-close-modal" class="btn btn-secondary" style="flex:1; justify-content:center;">Annuler</button>
+          <button type="submit" class="btn" style="flex:1; justify-content:center;">Publier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="js/demandes.js"></script>
+</body>
+</html>
+

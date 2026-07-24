@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ClassHub - Connexion</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="login-page">
+
+  <div class="card" style="text-align: center;" id="login-card">
+    <span class="material-icons" style="font-size: 48px; color: var(--accent);">forum</span>
+    <h2 style="margin: 1rem 0 0.5rem 0;">Connexion</h2>
+    
+    <button id="btn-login-google" class="btn" style="width: 100%; justify-content: center; margin-bottom: 1rem; margin-top: 1.5rem;">
+      <span class="material-icons">login</span> Continuer avec Google
+    </button>
+
+    <div style="display: flex; align-items: center; margin: 1.5rem 0; color: var(--text-muted);">
+      <hr style="flex: 1; border: none; border-top: 1px solid var(--border-color);">
+      <span style="padding: 0 10px; font-size: 0.85rem;">OU</span>
+      <hr style="flex: 1; border: none; border-top: 1px solid var(--border-color);">
+    </div>
+
+    <form id="form-email-login">
+      <div class="form-group" style="text-align: left;">
+        <label>Adresse E-mail</label>
+        <input type="email" id="email-input" required placeholder="eleve@exemple.com">
+      </div>
+      <div class="form-group" style="text-align: left;">
+        <label>Mot de passe</label>
+        <input type="password" id="password-input" required placeholder="••••••••">
+      </div>
+      
+      <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1.5rem;">
+        <button type="submit" id="btn-sign-in" class="btn" style="width: 100%; justify-content: center;">Se connecter</button>
+        <button type="button" id="btn-sign-up" class="btn btn-secondary" style="width: 100%; justify-content: center;">Créer un compte</button>
+      </div>
+    </form>
+    
+    <p id="auth-error" style="color: var(--danger); font-size: 0.85rem; margin-top: 1rem; display: none;"></p>
+  </div>
+
+  <div class="card" id="onboarding-container" style="display: none;">
+    <h3 style="margin-bottom: 1.5rem; font-size: 1.2rem; text-align: center;">Votre Profil</h3>
+    
+    <div class="form-group">
+      <label>Prénom</label>
+      <input type="text" id="onboard-prenom" placeholder="Ex: Lucas" required>
+    </div>
+    
+    <div class="form-group">
+      <label>Nom</label>
+      <input type="text" id="onboard-nom" placeholder="Ex: Dupont" required>
+    </div>
+
+    <div class="form-group">
+      <label>Ville ou Nom de l'établissement</label>
+      <input type="text" id="search-etablissement" placeholder="Ex: Paris ou Lycée Victor Hugo">
+    </div>
+
+    <div class="form-group">
+      <label>Établissement</label>
+      <select id="onboard-etablissement" required disabled>
+        <option value="">-- Tapez une ville ou un nom ci-dessus --</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Niveau</label>
+      <select id="onboard-niveau" required>
+        <option value="">-- Choisir un niveau --</option>
+        <option value="6EME">6ème</option>
+        <option value="5EME">5ème</option>
+        <option value="4EME">4ème</option>
+        <option value="3EME">3ème</option>
+        <option value="2NDE">Seconde</option>
+        <option value="1ERE">Première</option>
+        <option value="TERM">Terminale</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Numéro ou Lettre de classe</label>
+      <input type="text" id="onboard-numero-classe" placeholder="Ex: 11, 1, A, B..." required>
+    </div>
+
+    <button id="btn-save-onboarding" class="btn" style="width: 100%; justify-content: center; margin-top: 1.5rem;">
+      Rejoindre la classe
+    </button>
+  </div>
+
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>

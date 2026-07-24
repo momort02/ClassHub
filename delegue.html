@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ClassHub - Délégué</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <nav class="sidebar">
+      <ul class="nav-menu">
+        <a href="dashboard.html" class="nav-item"><span class="material-icons">arrow_back</span>Retour</a>
+      </ul>
+    </nav>
+    <main class="main-content">
+      <div class="header-bar"><h2>Espace Délégué</h2></div>
+      
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number" id="stat-total">0</div><div class="stat-label">Demandes</div></div>
+        <div class="stat-card"><div class="stat-number" id="stat-attente" style="color:var(--warning);">0</div><div class="stat-label">En attente</div></div>
+      </div>
+
+      <div class="card">
+        <h3>Gérer les Demandes de la Classe</h3>
+        <div id="delegue-demandes-list" style="margin-top: 1rem;"></div>
+      </div>
+
+      <div class="card">
+        <h3>Saisir l'Avis des Profs / Conseil</h3>
+        <form id="form-avis" style="margin-top:1rem;">
+          <div class="form-group">
+            <label>Sélectionner l'Élève</label>
+            <select id="avis-eleve-select" required>
+              <option value="">Chargement des élèves...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Période</label>
+            <select id="avis-periode-select" required>
+              <option value="Trimestre 1">Trimestre 1</option>
+              <option value="Trimestre 2">Trimestre 2</option>
+              <option value="Trimestre 3">Trimestre 3</option>
+              <option value="Semestre 1">Semestre 1</option>
+              <option value="Semestre 2">Semestre 2</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Avis / Conseil de la classe / Profs</label>
+            <textarea id="avis-texte" rows="3" placeholder="Ex: Très bon trimestre..." required></textarea>
+          </div>
+          <button type="submit" class="btn" style="width:100%; justify-content:center;">Enregistrer l'avis</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Publier une Annonce</h3>
+        <form id="form-annonce" style="margin-top:1rem;">
+          <div class="form-group"><input type="text" id="annonce-titre" placeholder="Titre" required></div>
+          <div class="form-group"><textarea id="annonce-contenu" rows="2" placeholder="Message..." required></textarea></div>
+          <button type="submit" class="btn" style="width:100%; justify-content:center;">Publier</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Créer un Sondage</h3>
+        <form id="form-sondage" style="margin-top:1rem;">
+          <div class="form-group"><input type="text" id="sondage-question" placeholder="Question" required></div>
+          <div class="form-group"><input type="text" id="sondage-opt1" placeholder="Option 1" required></div>
+          <div class="form-group"><input type="text" id="sondage-opt2" placeholder="Option 2" required></div>
+          <button type="submit" class="btn" style="width:100%; justify-content:center;">Créer</button>
+        </form>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="js/delegue.js"></script>
+</body>
+</html>

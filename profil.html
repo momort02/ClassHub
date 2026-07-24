@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ClassHub - Profil & Support</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <nav class="sidebar">
+      <ul class="nav-menu">
+        <a href="dashboard.html" class="nav-item"><span class="material-icons">forum</span>Demandes</a>
+        <a href="annonces.html" class="nav-item"><span class="material-icons">campaign</span>Annonces</a>
+        <a href="sondages.html" class="nav-item"><span class="material-icons">poll</span>Sondages</a>
+        <a href="profil.html" class="nav-item active"><span class="material-icons">person</span>Profil</a>
+      </ul>
+    </nav>
+    <main class="main-content">
+      <div class="header-bar"><h2>Mon Profil</h2></div>
+      
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+          <div style="position:relative; flex-shrink:0;">
+            <img id="profil-avatar" src="" alt="Photo de profil" style="width:64px; height:64px; border-radius:50%; object-fit:cover; background:var(--bg-tertiary); border:2px solid var(--border-color); display:block;">
+            <button id="btn-change-avatar" type="button" style="position:absolute; bottom:-4px; right:-4px; width:26px; height:26px; border-radius:50%; background:var(--accent); border:2px solid var(--card-bg); display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer;">
+              <span class="material-icons" style="font-size:14px;">edit</span>
+            </button>
+            <input type="file" id="avatar-input" accept="image/*" style="display:none;">
+          </div>
+          <div>
+            <h3 id="profil-nom-complet" style="margin-bottom: 0.2rem;">...</h3>
+            <p id="profil-email" style="color: var(--text-muted); font-size:0.85rem;"></p>
+          </div>
+        </div>
+        <p id="avatar-status" style="font-size:0.78rem; color:var(--text-muted); margin:-1rem 0 1rem 0; display:none;"></p>
+        <div class="form-group"><label>Classe</label><input type="text" id="profil-classe" readonly></div>
+        <div class="form-group"><label>Rôle</label><input type="text" id="profil-role" readonly></div>
+        <a href="delegue.html" id="btn-delegue" class="btn" style="display:none; width:100%; justify-content:center; margin-top:1rem; background-color:var(--warning); color:#000;">
+          <span class="material-icons">admin_panel_settings</span> Espace Délégué
+        </a>
+      </div>
+
+      <div class="card">
+        <h3>💬 Contact & Support</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+          Un problème avec la plateforme ou une question ? Envoie un message à l'administrateur.
+        </p>
+        <form id="form-support">
+          <div class="form-group">
+            <label>Sujet</label>
+            <input type="text" id="support-sujet" placeholder="Ex: Problème d'élection, Bug..." required>
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea id="support-message" rows="3" placeholder="Décrivez votre souci..." required style="width:100%; border-radius:6px; padding:0.5rem; background:var(--bg-tertiary); color:var(--text-primary); border:1px solid var(--border-color);"></textarea>
+          </div>
+          <button type="submit" class="btn" style="width:100%; justify-content:center; margin-top:0.5rem;">
+            <span class="material-icons">send</span> Envoyer au Support
+          </button>
+        </form>
+      </div>
+
+      <div class="card" id="card-election">
+        <h3>🗳️ Élection des Délégués</h3>
+        <p id="election-status-msg" style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0 1rem 0;"></p>
+        
+        <div id="election-candidature-box" style="display:none; margin-bottom:1.5rem; padding:1rem; background:var(--bg-tertiary); border-radius:8px;">
+          <h4 style="font-size:0.9rem; margin-bottom:0.5rem;">Se présenter en binôme</h4>
+          <div class="form-group">
+            <label>Choisir votre Suppléant(e)</label>
+            <select id="select-suppleant">
+              <option value="">-- Sélectionner un élève --</option>
+            </select>
+          </div>
+          <button id="btn-creer-binome" class="btn btn-secondary" style="width:100%; justify-content:center;">
+            Valider la candidature
+          </button>
+        </div>
+
+        <div id="election-vote-box" style="display:none;">
+          <h4 id="tour-titre" style="font-size:0.95rem; margin-bottom:0.5rem; color:var(--accent);">Candidats :</h4>
+          <div id="candidats-list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📝 Mes Avis & Conseils de Classe</h3>
+        <div id="liste-avis-container">
+          <p style="color:var(--text-muted); font-style:italic;">Chargement des avis...</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script type="module" src="js/profil.js"></script>
+</body>
+</html>
