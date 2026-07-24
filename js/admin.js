@@ -1,21 +1,6 @@
 import { auth, db } from "../firebase/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { collection, query, onSnapshot, doc, getDoc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
-
-// L'accès admin n'est plus protégé par un mot de passe partagé écrit dans le
-// code (n'importe qui pouvait le lire dans les DevTools). Il dépend désormais
-// du champ `isAdmin` (booléen) du profil Firestore du compte connecté.
-//
-// `isAdmin` est volontairement séparé de `role` (qui vaut "eleve" ou
-// "delegue" et change à chaque élection / rentrée scolaire). Un `updateDoc`
-// qui modifie `role` ne touche jamais `isAdmin` : on peut donc être délégué
-// ET admin en même temps, et le rester après une élection ou une
-// réinitialisation annuelle.
-//
-// Pour nommer le tout premier admin : ouvrir la console Firebase >
-// Firestore Database > collection "users" > le document de la personne
-// concernée > ajouter le champ `isAdmin` (booléen) à `true`. Ensuite, cette
-// personne peut nommer d'autres admins directement depuis cette page.
+import { collection, query, onSnapshot, doc, getDoc, updateDoc, deleteDoc, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
 const deniedCard = document.getElementById("admin-denied");
 const adminContent = document.getElementById("admin-content");
@@ -40,6 +25,17 @@ function getDefaultEditableField(collectionName) {
     case "support_tickets": return "sujet";
     default: return "";
   }
+}
+
+function formatDateInputValue(dateValue) {
+  if (!dateValue) return "";
+
+  const date = dateValue?.toDate ? dateValue.toDate() : new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60000);
+  return localDate.toISOString().split("T")[0];
 }
 
 function parseEditableValue(rawValue, currentValue) {
@@ -95,6 +91,31 @@ onAuthStateChanged(auth, async (user) => {
   loadAdminDashboard();
 });
 
+async function loadElectionDateSettings(classId) {
+  const startInput = document.getElementById("admin-election-start-date");
+  const endInput = document.getElementById("admin-election-end-date");
+  const statusEl = document.getElementById("election-date-status");
+
+  if (!classId || !startInput || !endInput) return;
+
+  startInput.value = "";
+  endInput.value = "";
+
+  const snap = await getDoc(doc(db, "elections_classes", classId));
+  if (snap.exists()) {
+    const data = snap.data();
+    startInput.value = formatDateInputValue(data.startDate);
+    endInput.value = formatDateInputValue(data.endDate);
+    if (statusEl) {
+      statusEl.textContent = `Dates actuellement enregistrées pour la classe ${classId}.`;
+      statusEl.style.color = "var(--accent)";
+    }
+  } else if (statusEl) {
+    statusEl.textContent = `Aucune date enregistrée pour la classe ${classId}.`;
+    statusEl.style.color = "var(--text-muted)";
+  }
+}
+
 function loadAdminDashboard() {
   // Chargement des utilisateurs
   const usersRef = collection(db, "users");
@@ -122,6 +143,27 @@ function loadAdminDashboard() {
       selectFilter.innerHTML += `<option value="${cId}">${cId}</option>`;
     });
 
+    const electionClassSelect = document.getElementById("admin-election-class-select");
+    if (electionClassSelect) {
+      electionClassSelect.innerHTML = '<option value="">Sélectionner une classe</option>';
+      classesSet.forEach(cId => {
+        electionClassSelect.innerHTML += `<option value="${cId}">${cId}</option>`;
+      });
+
+      if (!electionClassSelect.dataset.bound) {
+        electionClassSelect.dataset.bound = "true";
+        electionClassSelect.addEventListener("change", (e) => {
+          loadElectionDateSettings(e.target.value);
+        });
+      }
+
+      const firstClass = Array.from(classesSet)[0];
+      if (firstClass) {
+        electionClassSelect.value = firstClass;
+        loadElectionDateSettings(firstClass);
+      }
+    }
+
     renderUsersList("ALL");
   });
 
@@ -132,7 +174,13 @@ function loadAdminDashboard() {
     container.innerHTML = "";
 
     if (snapshot.empty) {
-      container.innerHTML = "<p style='color:var(--text-muted); font-style:italic;'>Aucun message de support pour le moment.</p>";
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🛟</div>
+          <h4>Aucun message de support</h4>
+          <p>Les demandes d’aide apparaîtront ici.</p>
+        </div>
+      `;
       return;
     }
 
@@ -172,6 +220,56 @@ function loadAdminDashboard() {
     loadDatabaseCollection(e.target.value);
   });
 
+  document.getElementById("btn-save-election-dates")?.addEventListener("click", async () => {
+    const classId = document.getElementById("admin-election-class-select")?.value;
+    const startInput = document.getElementById("admin-election-start-date");
+    const endInput = document.getElementById("admin-election-end-date");
+    const statusEl = document.getElementById("election-date-status");
+
+    if (!classId || !startInput?.value || !endInput?.value) {
+      if (statusEl) {
+        statusEl.textContent = "Sélectionnez une classe et renseignez les deux dates.";
+        statusEl.style.color = "var(--danger)";
+      }
+      return;
+    }
+
+    const startDate = new Date(`${startInput.value}T00:00:00`);
+    const endDate = new Date(`${endInput.value}T23:59:59`);
+
+    if (endDate < startDate) {
+      if (statusEl) {
+        statusEl.textContent = "La date de fin doit être postérieure à la date de début.";
+        statusEl.style.color = "var(--danger)";
+      }
+      return;
+    }
+
+    const electionRef = doc(db, "elections_classes", classId);
+
+    try {
+      await setDoc(electionRef, {
+        classId,
+        startDate,
+        endDate,
+        statut: "en_cours",
+        tour: 1,
+        modeDesignation: false,
+      }, { merge: true });
+
+      if (statusEl) {
+        statusEl.textContent = `Dates enregistrées pour la classe ${classId}.`;
+        statusEl.style.color = "var(--success)";
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement des dates d'élection :", error);
+      if (statusEl) {
+        statusEl.textContent = "Échec de l'enregistrement. Vérifie la connexion puis réessaie.";
+        statusEl.style.color = "var(--danger)";
+      }
+    }
+  });
+
   loadDatabaseCollection("users");
 }
 
@@ -186,7 +284,13 @@ async function loadDatabaseCollection(collectionName) {
     const docs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
 
     if (docs.length === 0) {
-      container.innerHTML = "<p style='color:var(--text-muted);'>Aucune donnée dans cette collection.</p>";
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🗂️</div>
+          <h4>Aucune donnée dans cette collection</h4>
+          <p>La base de données affichera ici les nouveaux éléments dès qu’ils seront ajoutés.</p>
+        </div>
+      `;
       return;
     }
 
@@ -304,7 +408,13 @@ function renderUsersList(selectedClass) {
     : allUsers.filter(u => u.classId === selectedClass);
 
   if (filtered.length === 0) {
-    container.innerHTML = "<p style='color:var(--text-muted);'>Aucun élève trouvé.</p>";
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">👤</div>
+        <h4>Aucun élève trouvé</h4>
+        <p>Aucune personne ne correspond à ce filtre pour le moment.</p>
+      </div>
+    `;
     return;
   }
 

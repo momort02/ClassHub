@@ -20,6 +20,17 @@ onAuthStateChanged(auth, async (user) => {
     const c = document.getElementById("sondages-list");
     c.innerHTML = "";
 
+    if (s.empty) {
+      c.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📊</div>
+          <h4>Aucun sondage pour le moment</h4>
+          <p>Les sondages créés par la classe apparaîtront ici.</p>
+        </div>
+      `;
+      return;
+    }
+
     s.forEach((d) => {
       const v = d.data();
       const pollId = d.id;

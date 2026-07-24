@@ -4,6 +4,37 @@ import { collection, query, where, onSnapshot, addDoc, doc, getDoc, updateDoc, s
 
 let currentUser = null;
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function showToast(message, type = "success") {
+  const stack = document.getElementById("toast-stack");
+  if (!stack) return;
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type === "success" ? "toast-success" : ""}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${type === "success" ? "✓" : "i"}</span>
+    <div>
+      <strong>${type === "success" ? "Succès" : "Information"}</strong>
+      <p>${escapeHtml(message)}</p>
+    </div>
+  `;
+
+  stack.appendChild(toast);
+  window.setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(6px) scale(0.98)";
+    window.setTimeout(() => toast.remove(), 220);
+  }, 2800);
+}
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
   const snap = await getDoc(doc(db, "users", user.uid));
@@ -25,6 +56,19 @@ function listenDemandesDelegue() {
     const container = document.getElementById("delegue-demandes-list");
     container.innerHTML = "";
 
+    if (s.empty) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <h4>Aucune demande pour le moment</h4>
+          <p>Les nouvelles demandes de la classe apparaîtront ici automatiquement.</p>
+        </div>
+      `;
+      document.getElementById("stat-total").textContent = total;
+      document.getElementById("stat-attente").textContent = attente;
+      return;
+    }
+
     s.forEach(d => {
       total++;
       const data = d.data();
@@ -32,7 +76,7 @@ function listenDemandesDelegue() {
 
       const authorLabel = data.anonyme ? "Anonyme" : data.authorName;
       const div = document.createElement("div");
-      div.className = "card";
+      div.className = "card request-card";
       div.style.background = "var(--bg-tertiary)";
       div.innerHTML = `
         <h4>${data.titre} <small>(${authorLabel})</small></h4>
@@ -55,6 +99,7 @@ function listenDemandesDelegue() {
         const id = e.currentTarget.dataset.id;
         const newStatut = e.currentTarget.dataset.statut;
         await updateDoc(doc(db, "demandes", id), { statut: newStatut });
+        showToast(`Le statut a été mis à jour avec succès.`, "success");
       });
     });
   });
@@ -91,7 +136,7 @@ document.getElementById("form-avis")?.addEventListener("submit", async (e) => {
   });
 
   e.target.reset();
-  alert(`Avis du ${periode} enregistré avec succès !`);
+  showToast(`Avis du ${periode} enregistré avec succès.`, "success");
 });
 
 document.getElementById("form-annonce")?.addEventListener("submit", async (e) => {
@@ -102,7 +147,7 @@ document.getElementById("form-annonce")?.addEventListener("submit", async (e) =>
     classId: currentUser.classId 
   });
   e.target.reset(); 
-  alert("Annonce publiée !");
+  showToast("Annonce publiée avec succès.", "success");
 });
 
 document.getElementById("form-sondage")?.addEventListener("submit", async (e) => {
@@ -117,5 +162,5 @@ document.getElementById("form-sondage")?.addEventListener("submit", async (e) =>
     classId: currentUser.classId 
   });
   e.target.reset(); 
-  alert("Sondage créé !");
+  showToast("Sondage créé avec succès.", "success");
 });

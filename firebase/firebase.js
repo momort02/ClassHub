@@ -66,7 +66,5 @@ function initThemePreference() {
 }
 
 initThemePreference();
-// Pas d'export "storage" : les photos de profil sont stockées directement
-// dans Firestore (voir js/profil.js), pas besoin de Firebase Storage, donc
-// pas besoin du plan payant Blaze pour ça.
+
 

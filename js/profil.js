@@ -234,8 +234,10 @@ async function verifierReinitialisationAnnuelle() {
         tour: 1,
         statut: "en_cours",
         modeDesignation: false,
-        derniereRentree: currentYear
-      });
+        derniereRentree: currentYear,
+        startDate: classSnap.exists() && classSnap.data().startDate ? classSnap.data().startDate : new Date(currentYear, 8, 15),
+        endDate: classSnap.exists() && classSnap.data().endDate ? classSnap.data().endDate : new Date(currentYear, 9, 1)
+      }, { merge: true });
 
       console.log("✅ Réinitialisation annuelle effectuée !");
     }
@@ -245,8 +247,18 @@ async function verifierReinitialisationAnnuelle() {
 async function initElections() {
   const now = new Date();
   const year = now.getFullYear();
-  const startDate = new Date(year, 8, 15); // 15 Septembre
-  const endDate = new Date(year, 9, 1);    // 1er Octobre
+  const electionRef = doc(db, "elections_classes", currentUserData.classId);
+  const electionSnap = await getDoc(electionRef);
+  const electionData = electionSnap.exists() ? electionSnap.data() : {};
+
+  const defaultStartDate = new Date(year, 8, 15); // 15 Septembre
+  const defaultEndDate = new Date(year, 9, 1);    // 1er Octobre
+  const startDate = electionData.startDate
+    ? (electionData.startDate.toDate ? electionData.startDate.toDate() : new Date(electionData.startDate))
+    : defaultStartDate;
+  const endDate = electionData.endDate
+    ? (electionData.endDate.toDate ? electionData.endDate.toDate() : new Date(electionData.endDate))
+    : defaultEndDate;
 
   const statusMsg = document.getElementById("election-status-msg");
   const candBox = document.getElementById("election-candidature-box");
@@ -256,9 +268,6 @@ async function initElections() {
     statusMsg.textContent = `Les élections ouvriront le 15 septembre ${year}.`;
     return;
   }
-
-  const electionRef = doc(db, "elections_classes", currentUserData.classId);
-  const electionSnap = await getDoc(electionRef);
 
   let tourActuel = 1;
   let modeDesignation = false;
@@ -324,6 +333,18 @@ async function initElections() {
       const suppUid = selectSupp.value;
       if (!suppUid) return alert("Sélectionnez un suppléant.");
 
+      const existingQuery = query(
+        collection(db, "binomes_candidats"),
+        where("classId", "==", currentUserData.classId),
+        where("titulaireUid", "==", currentUser.uid)
+      );
+      const existingSnap = await getDocs(existingQuery);
+
+      if (!existingSnap.empty) {
+        alert("Vous avez déjà déposé une présentation pour cette élection.");
+        return;
+      }
+
       const suppSnap = await getDoc(doc(db, "users", suppUid));
       const suppData = suppSnap.data();
 
@@ -382,7 +403,13 @@ async function initElections() {
   });
 
   if (candList.children.length === 0) {
-    candList.innerHTML = "<p style='font-style:italic; font-size:0.85rem;'>Aucun binôme candidat pour l'instant.</p>";
+    candList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🗳️</div>
+        <h4>Aucun binôme candidat</h4>
+        <p>Les candidatures apparaîtront ici dès qu’elles seront déposées.</p>
+      </div>
+    `;
   }
 
   if (totalEleves > 0 && totalVotesCount >= totalEleves) {
@@ -442,6 +469,17 @@ function afficherModeDesignation(usersSnap) {
   const candList = document.getElementById("candidats-list");
   candList.innerHTML = "<p style='font-size:0.85rem; margin-bottom:1rem;'>Votez pour l'élève que vous souhaitez désigner comme délégué d'office :</p>";
 
+  if (usersSnap.empty) {
+    candList.innerHTML += `
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h4>Aucun élève disponible</h4>
+        <p>La liste des élèves apparaîtra ici à mesure que la classe sera renseignée.</p>
+      </div>
+    `;
+    return;
+  }
+
   usersSnap.forEach((d) => {
     const u = d.data();
     const btnDesign = document.createElement("button");
@@ -464,7 +502,13 @@ function loadAvis() {
     const container = document.getElementById("liste-avis-container");
     container.innerHTML = "";
     if (snapshot.empty) {
-      container.innerHTML = `<p style="color:var(--text-muted); font-style:italic;">Aucun avis enregistré.</p>`;
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <h4>Aucun avis enregistré</h4>
+          <p>Les avis des professeurs apparaîtront ici une fois saisis.</p>
+        </div>
+      `;
       return;
     }
     snapshot.forEach((d) => {

@@ -47,7 +47,34 @@
         </div>
 
         <div class="card">
-          <h3>💬 Messages de Support / Contact</h3>
+          <h3>� Dates des Élections de Délégués</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+            Définissez la période pendant laquelle les élections seront ouvertes pour chaque classe.
+          </p>
+
+          <div class="form-group">
+            <label>Classe concernée</label>
+            <select id="admin-election-class-select">
+              <option value="">Sélectionner une classe</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Date de début</label>
+            <input type="date" id="admin-election-start-date">
+          </div>
+
+          <div class="form-group">
+            <label>Date de fin</label>
+            <input type="date" id="admin-election-end-date">
+          </div>
+
+          <button id="btn-save-election-dates" class="btn">Enregistrer les dates</button>
+          <p id="election-date-status" style="margin-top:0.8rem; font-size:0.85rem; color:var(--text-muted);">Sélectionnez une classe pour afficher ou modifier ses dates d’élection.</p>
+        </div>
+
+        <div class="card">
+          <h3>�💬 Messages de Support / Contact</h3>
           <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
             Messages envoyés par les élèves depuis leur page profil.
           </p>

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ClassHub - Délégué</title>
   <link rel="stylesheet" href="css/style.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -11,34 +11,58 @@
   <div id="app">
     <nav class="sidebar">
       <ul class="nav-menu">
-        <a href="dashboard.html" class="nav-item"><span class="material-icons">arrow_back</span>Retour</a>
+        <li class="nav-item-wrapper">
+          <a href="dashboard.html" class="nav-item"><span class="material-icons">arrow_back</span>Retour</a>
+        </li>
       </ul>
     </nav>
     <main class="main-content">
-      <div class="header-bar"><h2>Espace Délégué</h2></div>
+      <div class="header-bar">
+        <div class="header-copy">
+          <div class="eyebrow">Tableau de bord</div>
+          <h2>Espace Délégué</h2>
+          <p>Centralisez les demandes, avis et communications de la classe dans un espace clair et efficace.</p>
+        </div>
+        <a href="dashboard.html" class="btn btn-secondary">← Retour au tableau de bord</a>
+      </div>
+
+      <div class="card hero-card">
+        <div class="hero-content">
+          <div>
+            <p class="eyebrow">Centre de pilotage</p>
+            <h3>Gérez les demandes et les communications de votre classe</h3>
+            <p>Suivez les demandes, publiez des annonces et recueillez les avis des professeurs en quelques clics.</p>
+          </div>
+          <div class="hero-badges">
+            <span class="summary-chip">⚡ Réactivité</span>
+            <span class="summary-chip">📢 Communication</span>
+            <span class="summary-chip">📝 Suivi</span>
+          </div>
+        </div>
+      </div>
       
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-number" id="stat-total">0</div><div class="stat-label">Demandes</div></div>
-        <div class="stat-card"><div class="stat-number" id="stat-attente" style="color:var(--warning);">0</div><div class="stat-label">En attente</div></div>
+        <div class="stat-card"><div class="stat-number stat-warning" id="stat-attente">0</div><div class="stat-label">En attente</div></div>
       </div>
 
-      <div class="card">
+      <div class="card section-card">
         <h3>Gérer les Demandes de la Classe</h3>
-        <div id="delegue-demandes-list" style="margin-top: 1rem;"></div>
+        <div id="delegue-demandes-list" class="section-list"></div>
       </div>
 
-      <div class="card">
+      <div class="card section-card">
         <h3>Saisir l'Avis des Profs / Conseil</h3>
-        <form id="form-avis" style="margin-top:1rem;">
+        <form id="form-avis" class="section-form">
           <div class="form-group">
             <label>Sélectionner l'Élève</label>
-            <select id="avis-eleve-select" required>
+            <select id="avis-eleve-select" required title="Sélectionner un élève">
               <option value="">Chargement des élèves...</option>
             </select>
           </div>
           <div class="form-group">
             <label>Période</label>
-            <select id="avis-periode-select" required>
+            <select id="avis-periode-select" required title="Sélectionner une période">
               <option value="Trimestre 1">Trimestre 1</option>
               <option value="Trimestre 2">Trimestre 2</option>
               <option value="Trimestre 3">Trimestre 3</option>
@@ -50,30 +74,31 @@
             <label>Avis / Conseil de la classe / Profs</label>
             <textarea id="avis-texte" rows="3" placeholder="Ex: Très bon trimestre..." required></textarea>
           </div>
-          <button type="submit" class="btn" style="width:100%; justify-content:center;">Enregistrer l'avis</button>
+          <button type="submit" class="btn full-width-btn">Enregistrer l'avis</button>
         </form>
       </div>
 
-      <div class="card">
+      <div class="card section-card">
         <h3>Publier une Annonce</h3>
-        <form id="form-annonce" style="margin-top:1rem;">
+        <form id="form-annonce" class="section-form">
           <div class="form-group"><input type="text" id="annonce-titre" placeholder="Titre" required></div>
           <div class="form-group"><textarea id="annonce-contenu" rows="2" placeholder="Message..." required></textarea></div>
-          <button type="submit" class="btn" style="width:100%; justify-content:center;">Publier</button>
+          <button type="submit" class="btn full-width-btn">Publier</button>
         </form>
       </div>
 
-      <div class="card">
+      <div class="card section-card">
         <h3>Créer un Sondage</h3>
-        <form id="form-sondage" style="margin-top:1rem;">
+        <form id="form-sondage" class="section-form">
           <div class="form-group"><input type="text" id="sondage-question" placeholder="Question" required></div>
           <div class="form-group"><input type="text" id="sondage-opt1" placeholder="Option 1" required></div>
           <div class="form-group"><input type="text" id="sondage-opt2" placeholder="Option 2" required></div>
-          <button type="submit" class="btn" style="width:100%; justify-content:center;">Créer</button>
+          <button type="submit" class="btn full-width-btn">Créer</button>
         </form>
       </div>
     </main>
   </div>
+  <div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
   <script type="module" src="js/delegue.js"></script>
 </body>
 </html>

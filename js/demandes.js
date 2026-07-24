@@ -81,6 +81,17 @@ function listenDemandes() {
   onSnapshot(q, (snapshot) => {
     listContainer.innerHTML = "";
 
+    if (snapshot.empty) {
+      listContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <h4>Aucune demande pour le moment</h4>
+          <p>Les propositions de la classe apparaîtront ici dès qu’elles seront publiées.</p>
+        </div>
+      `;
+      return;
+    }
+
     snapshot.forEach((d) => {
       const data = d.data();
       const id = d.id;
@@ -194,7 +205,13 @@ function listenComments(demandeId) {
     if (!container) return; // le panneau a pu être démonté entre-temps
 
     if (snapshot.empty) {
-      container.innerHTML = '<p style="color:var(--text-muted); font-size:0.8rem; font-style:italic;">Aucun commentaire pour l\'instant.</p>';
+      container.innerHTML = `
+        <div class="empty-state" style="padding:0.8rem; border-style:dashed; background:transparent;">
+          <div class="empty-icon">💬</div>
+          <h4>Aucun commentaire</h4>
+          <p>Soyez le premier à ouvrir la discussion.</p>
+        </div>
+      `;
       return;
     }
 
