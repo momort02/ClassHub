@@ -6,6 +6,7 @@ const deniedCard = document.getElementById("admin-denied");
 const adminContent = document.getElementById("admin-content");
 
 let allUsers = [];
+let knownClasses = [];
 
 function escapeHTML(str = "") {
   return String(str)
@@ -91,6 +92,27 @@ onAuthStateChanged(auth, async (user) => {
   loadAdminDashboard();
 });
 
+async function saveElectionDatesForClasses(classIds, startDate, endDate) {
+  for (const cId of classIds) {
+    await setDoc(doc(db, "elections_classes", cId), {
+      classId: cId,
+      startDate,
+      endDate,
+      statut: "en_cours",
+      tour: 1,
+      modeDesignation: false,
+    }, { merge: true });
+  }
+}
+
+function getDefaultResetYear() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const sept1ThisYear = new Date(`${year}-09-01T23:59:59`);
+  // Si le 1er septembre de cette année est déjà passé, on cible l'année scolaire suivante
+  return now > sept1ThisYear ? year + 1 : year;
+}
+
 async function loadElectionDateSettings(classId) {
   const startInput = document.getElementById("admin-election-start-date");
   const endInput = document.getElementById("admin-election-end-date");
@@ -100,6 +122,14 @@ async function loadElectionDateSettings(classId) {
 
   startInput.value = "";
   endInput.value = "";
+
+  if (classId === "ALL") {
+    if (statusEl) {
+      statusEl.textContent = "Renseigne des dates puis « Enregistrer » ou « Réinitialiser » pour les appliquer à toutes les classes.";
+      statusEl.style.color = "var(--text-muted)";
+    }
+    return;
+  }
 
   const snap = await getDoc(doc(db, "elections_classes", classId));
   if (snap.exists()) {
@@ -145,8 +175,9 @@ function loadAdminDashboard() {
 
     const electionClassSelect = document.getElementById("admin-election-class-select");
     if (electionClassSelect) {
-      electionClassSelect.innerHTML = '<option value="">Sélectionner une classe</option>';
-      classesSet.forEach(cId => {
+      knownClasses = Array.from(classesSet);
+      electionClassSelect.innerHTML = '<option value="">Sélectionner une classe</option><option value="ALL">📋 Toutes les classes</option>';
+      knownClasses.forEach(cId => {
         electionClassSelect.innerHTML += `<option value="${cId}">${cId}</option>`;
       });
 
@@ -245,26 +276,81 @@ function loadAdminDashboard() {
       return;
     }
 
-    const electionRef = doc(db, "elections_classes", classId);
+    const targetClasses = classId === "ALL" ? knownClasses : [classId];
+    if (targetClasses.length === 0) {
+      if (statusEl) {
+        statusEl.textContent = "Aucune classe disponible.";
+        statusEl.style.color = "var(--danger)";
+      }
+      return;
+    }
 
     try {
-      await setDoc(electionRef, {
-        classId,
-        startDate,
-        endDate,
-        statut: "en_cours",
-        tour: 1,
-        modeDesignation: false,
-      }, { merge: true });
+      await saveElectionDatesForClasses(targetClasses, startDate, endDate);
 
       if (statusEl) {
-        statusEl.textContent = `Dates enregistrées pour la classe ${classId}.`;
+        statusEl.textContent = classId === "ALL"
+          ? `Dates enregistrées pour les ${targetClasses.length} classes.`
+          : `Dates enregistrées pour la classe ${classId}.`;
         statusEl.style.color = "var(--success)";
       }
     } catch (error) {
       console.error("Erreur lors de l'enregistrement des dates d'élection :", error);
       if (statusEl) {
         statusEl.textContent = "Échec de l'enregistrement. Vérifie la connexion puis réessaie.";
+        statusEl.style.color = "var(--danger)";
+      }
+    }
+  });
+
+  document.getElementById("btn-reset-election-dates")?.addEventListener("click", async () => {
+    const classId = document.getElementById("admin-election-class-select")?.value;
+    const startInput = document.getElementById("admin-election-start-date");
+    const endInput = document.getElementById("admin-election-end-date");
+    const statusEl = document.getElementById("election-date-status");
+
+    if (!classId) {
+      if (statusEl) {
+        statusEl.textContent = "Sélectionnez une classe (ou « Toutes les classes ») avant de réinitialiser.";
+        statusEl.style.color = "var(--danger)";
+      }
+      return;
+    }
+
+    const targetClasses = classId === "ALL" ? knownClasses : [classId];
+    if (targetClasses.length === 0) {
+      if (statusEl) {
+        statusEl.textContent = "Aucune classe disponible.";
+        statusEl.style.color = "var(--danger)";
+      }
+      return;
+    }
+
+    const year = getDefaultResetYear();
+    const startDate = new Date(`${year}-08-15T00:00:00`);
+    const endDate = new Date(`${year}-09-01T23:59:59`);
+
+    const confirmMsg = classId === "ALL"
+      ? `Réinitialiser les dates au 15/08 → 01/09/${year} pour les ${targetClasses.length} classes ?`
+      : `Réinitialiser les dates au 15/08 → 01/09/${year} pour la classe ${classId} ?`;
+    if (!confirm(confirmMsg)) return;
+
+    try {
+      await saveElectionDatesForClasses(targetClasses, startDate, endDate);
+
+      if (startInput) startInput.value = formatDateInputValue(startDate);
+      if (endInput) endInput.value = formatDateInputValue(endDate);
+
+      if (statusEl) {
+        statusEl.textContent = classId === "ALL"
+          ? `Dates réinitialisées (15/08 → 01/09/${year}) pour les ${targetClasses.length} classes.`
+          : `Dates réinitialisées (15/08 → 01/09/${year}) pour la classe ${classId}.`;
+        statusEl.style.color = "var(--success)";
+      }
+    } catch (error) {
+      console.error("Erreur lors de la réinitialisation des dates d'élection :", error);
+      if (statusEl) {
+        statusEl.textContent = "Échec de la réinitialisation. Vérifie la connexion puis réessaie.";
         statusEl.style.color = "var(--danger)";
       }
     }
