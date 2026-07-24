@@ -37,6 +37,19 @@
         <p id="avatar-status" style="font-size:0.78rem; color:var(--text-muted); margin:-1rem 0 1rem 0; display:none;"></p>
         <div class="form-group"><label>Classe</label><input type="text" id="profil-classe" readonly></div>
         <div class="form-group"><label>Rôle</label><input type="text" id="profil-role" readonly></div>
+
+        <div class="settings-toggle" role="group" aria-label="Paramètres d'affichage">
+          <div>
+            <strong>Préférences</strong>
+            <p>Active le mode sombre pour l’interface.</p>
+          </div>
+          <label class="theme-switch" for="theme-toggle">
+            <input type="checkbox" id="theme-toggle">
+            <span></span>
+          </label>
+        </div>
+        <p id="theme-status" style="display:none; font-size:0.78rem; color:var(--text-muted); margin-top:0.5rem;"></p>
+
         <a href="delegue.html" id="btn-delegue" class="btn" style="display:none; width:100%; justify-content:center; margin-top:1rem; background-color:var(--warning); color:#000;">
           <span class="material-icons">admin_panel_settings</span> Espace Délégué
         </a>
