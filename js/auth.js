@@ -111,7 +111,8 @@ btnSaveOnboarding?.addEventListener("click", async () => {
     numeroClasse: numClasse,
     classe: classeNom,
     classId: classId,
-    role: "eleve"
+    role: "eleve",
+    isAdmin: false
   });
 
   window.location.href = "dashboard.html";

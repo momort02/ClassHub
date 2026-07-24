@@ -39,6 +39,10 @@
               <small style="color:var(--text-muted);">Délégués Actifs</small>
               <h2 id="stat-total-delegues">0</h2>
             </div>
+            <div style="flex:1; background:var(--bg-tertiary); padding:1rem; border-radius:8px; text-align:center;">
+              <small style="color:var(--text-muted);">Admins</small>
+              <h2 id="stat-total-admins">0</h2>
+            </div>
           </div>
         </div>
 
@@ -49,6 +53,31 @@
           </p>
           <div id="admin-support-list">
             <p style="color:var(--text-muted); font-style:italic;">Chargement des messages...</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>🗂️ Gestion complète de la base de données</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+            Sélectionnez une collection pour consulter, modifier ou supprimer les documents stockés dans Firestore.
+          </p>
+
+          <div class="form-group">
+            <label>Collection à gérer</label>
+            <select id="admin-collection-select">
+              <option value="users">Utilisateurs</option>
+              <option value="annonces">Annonces</option>
+              <option value="sondages">Sondages</option>
+              <option value="demandes">Demandes</option>
+              <option value="support_tickets">Tickets de support</option>
+              <option value="binomes_candidats">Binômes candidats</option>
+              <option value="elections_classes">Élections classes</option>
+              <option value="elections_votes">Votes élections</option>
+            </select>
+          </div>
+
+          <div id="admin-database-list">
+            <p style="color:var(--text-muted); font-style:italic;">Chargement des collections...</p>
           </div>
         </div>
 

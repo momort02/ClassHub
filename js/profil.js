@@ -1,12 +1,51 @@
-import { auth, db, storage } from "../firebase/firebase.js";
+import { auth, db } from "../firebase/firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, increment, getDocs, addDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
 
 let currentUser = null;
 let currentUserData = null;
 
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23313338'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%23949ba4'/%3E%3Cpath d='M8 60c2-14 14-22 24-22s22 8 24 22' fill='%23949ba4'/%3E%3C/svg%3E";
+
+// Taille maximale prudente pour le champ `photoURL` (chaîne base64 stockée
+// directement dans le document Firestore). Un document Firestore complet ne
+// peut pas dépasser 1 Mo ; on se garde une grosse marge pour le reste du
+// profil (nom, classe, historiques d'élection, etc.).
+const MAX_AVATAR_DATA_URL_LENGTH = 250_000; // ~180 Ko d'image réelle
+
+/**
+ * Redimensionne et recadre une image en carré, puis la compresse en JPEG.
+ * Tourne entièrement dans le navigateur (canvas), pas d'appel réseau :
+ * évite Firebase Storage (qui exige désormais le plan payant Blaze) sans
+ * dépendre d'un service tiers pour héberger les photos des élèves.
+ */
+function resizeImageToDataURL(file, size = 160, quality = 0.72) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Lecture du fichier impossible."));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Image illisible."));
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+
+        // Recadrage "cover" : on remplit le carré en centrant l'image,
+        // comme un avatar classique, plutôt que de la déformer.
+        const scale = Math.max(size / img.width, size / img.height);
+        const w = img.width * scale;
+        const h = img.height * scale;
+        ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
@@ -24,9 +63,10 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("profil-avatar").src = currentUserData.photoURL || DEFAULT_AVATAR;
     document.getElementById("profil-classe").value = currentUserData.classe || currentUserData.classId;
     document.getElementById("profil-role").value =
-      currentUserData.role === "delegue" ? "Délégué" :
-      currentUserData.role === "admin" ? "Administrateur" : "Élève";
+      (currentUserData.role === "delegue" ? "Délégué" : "Élève") +
+      (currentUserData.isAdmin === true ? " + Administrateur" : "");
     if (currentUserData.role === "delegue") document.getElementById("btn-delegue").style.display = "flex";
+    if (currentUserData.isAdmin === true) document.getElementById("btn-admin").style.display = "flex";
 
     initElections();
     loadAvis();
@@ -35,7 +75,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-/** Permet à l'élève de changer sa photo de profil (stockée dans Firebase Storage). */
+/** Permet à l'élève de changer sa photo de profil (compressée puis stockée dans Firestore). */
 function initAvatarUpload() {
   const btnChange = document.getElementById("btn-change-avatar");
   const fileInput = document.getElementById("avatar-input");
@@ -53,26 +93,35 @@ function initAvatarUpload() {
       statusEl.style.display = "block";
       return;
     }
-    if (file.size > 3 * 1024 * 1024) {
-      statusEl.textContent = "Image trop lourde (3 Mo max).";
+    if (file.size > 8 * 1024 * 1024) {
+      statusEl.textContent = "Image trop lourde (8 Mo max avant compression).";
       statusEl.style.display = "block";
       return;
     }
 
-    statusEl.textContent = "Envoi en cours…";
+    statusEl.textContent = "Compression de l'image…";
     statusEl.style.display = "block";
 
     try {
-      const avatarRef = ref(storage, `avatars/${currentUser.uid}`);
-      await uploadBytes(avatarRef, file);
-      const url = await getDownloadURL(avatarRef);
+      let dataUrl = await resizeImageToDataURL(file, 160, 0.72);
 
-      await updateDoc(doc(db, "users", currentUser.uid), { photoURL: url });
-      document.getElementById("profil-avatar").src = url;
+      // Si malgré la compression c'est encore trop lourd pour un champ
+      // Firestore, on retente une fois en plus petit/plus compressé avant
+      // d'abandonner (photo très détaillée, bruitée, etc.).
+      if (dataUrl.length > MAX_AVATAR_DATA_URL_LENGTH) {
+        dataUrl = await resizeImageToDataURL(file, 120, 0.55);
+      }
+      if (dataUrl.length > MAX_AVATAR_DATA_URL_LENGTH) {
+        statusEl.textContent = "Image trop complexe même compressée, essaie une autre photo.";
+        return;
+      }
+
+      await updateDoc(doc(db, "users", currentUser.uid), { photoURL: dataUrl });
+      document.getElementById("profil-avatar").src = dataUrl;
       statusEl.textContent = "Photo mise à jour ✅";
       setTimeout(() => { statusEl.style.display = "none"; }, 2500);
     } catch (err) {
-      console.error("Erreur upload avatar:", err);
+      console.error("Erreur traitement avatar:", err);
       statusEl.textContent = "Échec de l'envoi, réessaie.";
     }
   });
