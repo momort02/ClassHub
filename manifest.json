@@ -1,14 +1,21 @@
 {
+  "id": "/",
   "name": "ClassHub",
   "short_name": "ClassHub",
   "description": "Gestion de classe, délégués et annonces",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "orientation": "portrait-primary",
   "background_color": "#f4f6fb",
   "theme_color": "#4f46e5",
   "lang": "fr",
+  "dir": "ltr",
+  "categories": ["education", "productivity"],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -27,6 +34,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Annonces",
+      "short_name": "Annonces",
+      "description": "Voir les dernières annonces de la classe",
+      "url": "/annonces.html",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Sondages",
+      "short_name": "Sondages",
+      "description": "Participer aux sondages en cours",
+      "url": "/sondages.html",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mon profil",
+      "short_name": "Profil",
+      "description": "Accéder à mon profil",
+      "url": "/profil.html",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
