@@ -1,6 +1,10 @@
 import { auth, db, setThemePreference } from "../firebase/firebase.js";
+import { initNotifications, getNotificationPermissionState, getNotificationPrefs, saveNotificationPrefs, enablePushNotifications, disablePushNotifications } from "./notifications.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, increment, getDocs, addDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+initNotifications();
+
 
 let currentUser = null;
 let currentUserData = null;
@@ -69,6 +73,7 @@ onAuthStateChanged(auth, async (user) => {
     if (currentUserData.isAdmin === true) document.getElementById("btn-admin").style.display = "flex";
 
     initThemeSettings();
+    initNotificationSettings();
     initElections();
     loadAvis();
     initAvatarUpload();
@@ -99,6 +104,84 @@ function initThemeSettings() {
         statusEl.style.display = "none";
       }, 1800);
     }
+  });
+}
+
+/** Active/désactive les notifications push et les préférences par catégorie. */
+async function initNotificationSettings() {
+  const pushToggle = document.getElementById("push-toggle");
+  const permissionLabel = document.getElementById("push-permission-status");
+  const pushStatus = document.getElementById("push-status");
+  const categoriesBox = document.getElementById("notification-categories");
+  if (!pushToggle) return;
+
+  const CATEGORY_KEYS = ["nouvellesDemandes", "reponsesDemandes", "annonces", "sondages"];
+
+  function showPushStatus(message) {
+    if (!pushStatus) return;
+    pushStatus.textContent = message;
+    pushStatus.style.display = "block";
+    setTimeout(() => { pushStatus.style.display = "none"; }, 3000);
+  }
+
+  const permission = getNotificationPermissionState();
+  const hasTokenSaved = Array.isArray(currentUserData.fcmTokens) && currentUserData.fcmTokens.length > 0;
+  const active = permission === "granted" && hasTokenSaved;
+
+  pushToggle.checked = active;
+  if (categoriesBox) categoriesBox.style.display = active ? "block" : "none";
+  if (permissionLabel) {
+    permissionLabel.textContent =
+      permission === "denied" ? "Bloquées dans les réglages du navigateur."
+      : permission === "unsupported" ? "Non supportées sur cet appareil."
+      : active ? "Activées sur cet appareil."
+      : "Désactivées sur cet appareil.";
+  }
+
+  const prefs = await getNotificationPrefs(currentUser.uid);
+  CATEGORY_KEYS.forEach((key) => {
+    const el = document.getElementById(`notif-${key}`);
+    if (el) el.checked = prefs[key] !== false;
+  });
+
+  if (pushToggle.dataset.bound !== "true") {
+    pushToggle.dataset.bound = "true";
+    pushToggle.addEventListener("change", async () => {
+      pushToggle.disabled = true;
+      try {
+        if (pushToggle.checked) {
+          await enablePushNotifications();
+          if (categoriesBox) categoriesBox.style.display = "block";
+          if (permissionLabel) permissionLabel.textContent = "Activées sur cet appareil.";
+          showPushStatus("Notifications activées ✅");
+        } else {
+          await disablePushNotifications();
+          if (categoriesBox) categoriesBox.style.display = "none";
+          if (permissionLabel) permissionLabel.textContent = "Désactivées sur cet appareil.";
+          showPushStatus("Notifications désactivées.");
+        }
+      } catch (err) {
+        console.error("Erreur notifications push :", err);
+        pushToggle.checked = !pushToggle.checked;
+        showPushStatus(err.message || "Échec de l'activation des notifications.");
+      } finally {
+        pushToggle.disabled = false;
+      }
+    });
+  }
+
+  CATEGORY_KEYS.forEach((key) => {
+    const el = document.getElementById(`notif-${key}`);
+    if (!el || el.dataset.bound === "true") return;
+    el.dataset.bound = "true";
+    el.addEventListener("change", async () => {
+      const newPrefs = {};
+      CATEGORY_KEYS.forEach((k) => {
+        newPrefs[k] = document.getElementById(`notif-${k}`)?.checked !== false;
+      });
+      await saveNotificationPrefs(currentUser.uid, newPrefs);
+      showPushStatus("Préférences enregistrées ✅");
+    });
   });
 }
 

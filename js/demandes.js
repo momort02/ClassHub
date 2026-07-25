@@ -6,6 +6,9 @@
 // ============================================================================
 
 import { auth, db } from "../firebase/firebase.js";
+import { initNotifications } from "./notifications.js";
+
+initNotifications();
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import {
   collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp,

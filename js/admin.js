@@ -1,4 +1,7 @@
 import { auth, db } from "../firebase/firebase.js";
+import { initNotifications } from "./notifications.js";
+
+initNotifications();
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import { collection, query, onSnapshot, doc, getDoc, updateDoc, deleteDoc, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
