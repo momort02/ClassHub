@@ -256,7 +256,7 @@ async function poll(env) {
   for (const demande of newDemandes) {
     const classUsers = await usersOfClass(demande.classId);
     const recipients = classUsers.filter(
-      (u) => u.id !== demande.authorUid && (u.role === "delegue" || u.isAdmin === true) && prefOk(u, "nouvellesDemandes")
+      (u) => (u.role === "delegue" || u.isAdmin === true) && prefOk(u, "nouvellesDemandes")
     );
     await sendToUsers(
       accessToken,

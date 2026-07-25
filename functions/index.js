@@ -83,7 +83,6 @@ exports.onDemandeCreated = onDocumentCreated({ document: "demandes/{id}", region
   const usersSnap = await db.collection("users").where("classId", "==", demande.classId).get();
   const recipientUids = [];
   usersSnap.forEach((docSnap) => {
-    if (docSnap.id === demande.authorUid) return;
     const u = docSnap.data();
     if ((u.role === "delegue" || u.isAdmin === true) && prefOk(u, "nouvellesDemandes")) {
       recipientUids.push(docSnap.id);
