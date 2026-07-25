@@ -69,6 +69,7 @@ document.getElementById("form-demande")?.addEventListener("submit", async (e) =>
     votes: 0,
     votedBy: [],
     createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   });
 
   modal.classList.remove("active");

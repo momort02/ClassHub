@@ -3,7 +3,7 @@ import { initNotifications } from "./notifications.js";
 
 initNotifications();
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { collection, query, where, onSnapshot, addDoc, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+import { collection, query, where, onSnapshot, addDoc, doc, getDoc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
 let currentUser = null;
 
@@ -101,7 +101,7 @@ function listenDemandesDelegue() {
       b.addEventListener("click", async (e) => {
         const id = e.currentTarget.dataset.id;
         const newStatut = e.currentTarget.dataset.statut;
-        await updateDoc(doc(db, "demandes", id), { statut: newStatut });
+        await updateDoc(doc(db, "demandes", id), { statut: newStatut, updatedAt: serverTimestamp() });
         showToast(`Le statut a été mis à jour avec succès.`, "success");
       });
     });
