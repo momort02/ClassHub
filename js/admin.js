@@ -303,7 +303,8 @@ function loadAdminDashboard() {
     }
   });
 
-  document.getElementById("btn-reset-election-dates")?.addEventListener("click", async () => {
+  document.getElementById("btn-reset-election-dates")?.addEventListener("click", async (e) => {
+    const resetBtn = e.currentTarget;
     const classId = document.getElementById("admin-election-class-select")?.value;
     const startInput = document.getElementById("admin-election-start-date");
     const endInput = document.getElementById("admin-election-end-date");
@@ -317,6 +318,31 @@ function loadAdminDashboard() {
       return;
     }
 
+    // Confirmation en 2 clics (au lieu de window.confirm, qui peut être bloqué silencieusement
+    // dans certains navigateurs/webviews et donner l'impression que le bouton ne répond pas).
+    if (resetBtn.dataset.confirming !== "true") {
+      resetBtn.dataset.confirming = "true";
+      const originalLabel = resetBtn.textContent;
+      resetBtn.dataset.originalLabel = originalLabel;
+      resetBtn.textContent = "Cliquez à nouveau pour confirmer ✔️";
+      if (statusEl) {
+        statusEl.textContent = classId === "ALL"
+          ? "Cliquez de nouveau sur le bouton pour confirmer la réinitialisation de TOUTES les classes."
+          : `Cliquez de nouveau sur le bouton pour confirmer la réinitialisation pour la classe ${classId}.`;
+        statusEl.style.color = "var(--danger)";
+      }
+      clearTimeout(resetBtn._confirmTimeout);
+      resetBtn._confirmTimeout = setTimeout(() => {
+        resetBtn.dataset.confirming = "false";
+        resetBtn.textContent = resetBtn.dataset.originalLabel;
+      }, 4000);
+      return;
+    }
+
+    clearTimeout(resetBtn._confirmTimeout);
+    resetBtn.dataset.confirming = "false";
+    resetBtn.textContent = resetBtn.dataset.originalLabel || "↺ Réinitialiser (15/08 → 01/09)";
+
     const targetClasses = classId === "ALL" ? knownClasses : [classId];
     if (targetClasses.length === 0) {
       if (statusEl) {
@@ -329,11 +355,6 @@ function loadAdminDashboard() {
     const year = getDefaultResetYear();
     const startDate = new Date(`${year}-08-15T00:00:00`);
     const endDate = new Date(`${year}-09-01T23:59:59`);
-
-    const confirmMsg = classId === "ALL"
-      ? `Réinitialiser les dates au 15/08 → 01/09/${year} pour les ${targetClasses.length} classes ?`
-      : `Réinitialiser les dates au 15/08 → 01/09/${year} pour la classe ${classId} ?`;
-    if (!confirm(confirmMsg)) return;
 
     try {
       await saveElectionDatesForClasses(targetClasses, startDate, endDate);

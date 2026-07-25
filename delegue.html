@@ -6,6 +6,12 @@
   <title>ClassHub - Délégué</title>
   <link rel="stylesheet" href="css/style.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ClassHub">
 </head>
 <body>
   <div id="app">
@@ -100,5 +106,12 @@
   </div>
   <div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
   <script type="module" src="js/delegue.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch((err) => console.error("SW registration failed:", err));
+      });
+    }
+  </script>
 </body>
 </html>
