@@ -11,4 +11,4 @@ crons = ["*/2 * * * *"]
 # puis colle l'id retourné ci-dessous.
 [[kv_namespaces]]
 binding = "NOTIF_STATE"
-id = "REMPLACE_MOI_PAR_L_ID_DU_NAMESPACE_KV"
+id = "bdeea46ba90d4269859af62564b33b0a"
