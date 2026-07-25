@@ -2,6 +2,22 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <script>
+    // Première ouverture de l'app -> on reste sur l'accueil.
+    // Ouvertures suivantes -> on va directement au tableau de bord
+    // (si l'utilisateur n'est pas connecté, dashboard.html le renvoie vers login.html).
+    (function () {
+      try {
+        if (localStorage.getItem("classhub_opened")) {
+          window.location.replace("dashboard.html");
+        } else {
+          localStorage.setItem("classhub_opened", "1");
+        }
+      } catch (e) {
+        // localStorage indisponible (navigation privée, etc.) : on affiche l'accueil normalement.
+      }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ClassHub - Accueil</title>
   <link rel="stylesheet" href="css/style.css">
