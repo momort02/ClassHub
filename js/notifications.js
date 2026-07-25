@@ -9,10 +9,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/fi
 import { doc, getDoc, setDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 import { getMessaging, getToken, deleteToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging.js";
 
-// ⚠️ À REMPLACER : clé VAPID générée dans Firebase Console
-// (⚙️ Paramètres du projet → Cloud Messaging → onglet "Web configuration"
-// → "Générer une paire de clés"). Sans ça, l'activation échouera.
-export const VAPID_KEY = "REMPLACE_MOI_PAR_TA_CLE_VAPID";
+export const VAPID_KEY = "BDJgAEAEsbN8fqkufdc0dXgbx2uQ7q8rYOqsVLNQjoGtX4DJCkXIuSgT7hwMyPfSOQbYIC3LioZFxzoB8xcM6Go";
 
 export const DEFAULT_NOTIFICATION_PREFS = {
   nouvellesDemandes: true,
