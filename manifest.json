@@ -62,35 +62,35 @@
   "screenshots": [
     {
       "src": "/icons/screenshots/screenshot-demandes.jpg",
-      "sizes": "1080x2340",
+      "sizes": "1080x2230",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Page Demandes : proposer et suivre les demandes de la classe"
     },
     {
       "src": "/icons/screenshots/screenshot-annonces.jpg",
-      "sizes": "1080x2340",
+      "sizes": "1080x2230",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Page Annonces : les publications de la classe"
     },
     {
       "src": "/icons/screenshots/screenshot-sondages.jpg",
-      "sizes": "1080x2340",
+      "sizes": "1080x2230",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Page Sondages : participer aux sondages en cours"
     },
     {
       "src": "/icons/screenshots/screenshot-delegue.jpg",
-      "sizes": "1080x2340",
+      "sizes": "1080x2230",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Espace Délégué : centre de pilotage de la classe"
     },
     {
       "src": "/icons/screenshots/screenshot-profil.jpg",
-      "sizes": "1080x2340",
+      "sizes": "1080x2230",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Profil : support, élections et avis de classe"
