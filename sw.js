@@ -1,4 +1,4 @@
-const CACHE_NAME = "classhub-cache-v3";
+const CACHE_NAME = "classhub-cache-v4";
 
 const PRECACHE_URLS = [
   "/",
@@ -20,7 +20,6 @@ const PRECACHE_URLS = [
   "/js/demandes.js",
   "/js/profil.js",
   "/js/sondages.js",
-  "/js/notifications.js",
   "/firebase/firebase.js",
   "/manifest.json",
   "/icons/icon-192.png",

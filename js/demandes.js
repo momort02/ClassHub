@@ -6,9 +6,7 @@
 // ============================================================================
 
 import { auth, db } from "../firebase/firebase.js";
-import { initNotifications } from "./notifications.js";
 
-initNotifications();
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 import {
   collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp,
@@ -69,7 +67,6 @@ document.getElementById("form-demande")?.addEventListener("submit", async (e) =>
     votes: 0,
     votedBy: [],
     createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
   });
 
   modal.classList.remove("active");
